@@ -2,98 +2,141 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cảnh Giới Tu Đạo Vương Lâm</title>
+  <title>Tài xỉu tại nhà, chơi tới già không thắng!</title>
   <style>
     body {
-      background: #0f0f1a;
-      color: #e0e0ff;
-      font-family: "Segoe UI", sans-serif;
-      padding: 20px;
-    }
-
-    h1 {
+      background-color: #111;
+      color: white;
+      font-family: 'Helvetica', sans-serif;
       text-align: center;
-      color: #00ffe0;
-      margin-bottom: 30px;
+      padding-top: 15px;
     }
 
-    .step {
-      margin-bottom: 40px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      border-left: 4px solid #00ffe0;
-      border-radius: 6px;
+    .hidden {
+      display: none;
     }
 
-    .step h2 {
-      color: #00ffe0;
-      margin-bottom: 10px;
+    .dice {
+      font-size: 50px;
+      margin: 10px;
     }
 
-    .stage-list {
-      margin-left: 20px;
+    .result {
+      font-size: 20px;
+      margin-top: 10px;
     }
 
-    .stage-list li {
-      margin-bottom: 6px;
+    .btn {
+      background-color: blue;
+      color: white;
+      padding: 12px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      margin: 10px;
+      cursor: pointer;
     }
 
-    footer {
-      text-align: center;
-      margin-top: 50px;
-      font-size: 14px;
-      opacity: 0.6;
+    .btn:hover {
+      background-color: darkblue;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 5px;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <h1>Hành Trình Tu Đạo của Vương Lâm</h1>
 
-  <div class="step">
-    <h2>Bước Tu Đạo Thứ Nhất</h2>
-    <ul class="stage-list">
-      <li>Luyện Khí</li>
-      <li>Trúc Cơ</li>
-      <li>Kim Đan</li>
-      <li>Nguyên Anh</li>
-      <li>Hóa Thần</li>
-      <li>Anh Biến</li>
-      <li>Vấn Đỉnh</li>
-    </ul>
+  <h1>Tài xỉu tại nhà, chơi tới già không thắng!</h1>
+
+  <!-- Giao diện quay tài xỉu (seed cố định) -->
+  <div id="game-mode">
+    <div class="dice" id="dice1">🎲🎲🎲</div>
+    <div class="result" id="result1">Nhấn để quay!</div>
+    <button class="btn" onclick="rollRandom()">Quay tài xỉu!</button>
+    <button class="btn" onclick="switchMode()">Chuyển sang chế độ nhập seed</button>
   </div>
 
-  <div class="step">
-    <h2>Bước Tu Đạo Thứ Hai</h2>
-    <ul class="stage-list">
-      <li>Âm Hư</li>
-      <li>Dương Thực</li>
-      <li>Khuy Niết</li>
-      <li>Tịnh Niết</li>
-      <li>Toái Niết</li>
-    </ul>
-    <p><strong>Lưu ý:</strong> Tu sĩ bình thường sẽ phải vượt qua 5 lần thiên nhân suy kiếp. Nhưng Vương Lâm đặc biệt – <em>vượt thẳng từ Toái Niết lên bước thứ ba</em>.</p>
+  <!-- Giao diện nhập seed -->
+  <div id="seed-mode" class="hidden">
+    <p>Nhập số seed (bất kỳ):</p>
+    <input type="number" id="seedInput" placeholder="VD: 69969669" />
+    <div class="dice" id="dice2">🎲🎲🎲</div>
+    <div class="result" id="result2">Chưa quay!</div>
+    <button class="btn" onclick="rollWithSeed()">Quay với seed</button>
+    <button class="btn" onclick="switchMode()">Quay về chế độ chơi</button>
   </div>
 
-  <div class="step">
-    <h2>Bước Tu Đạo Thứ Ba</h2>
-    <ul class="stage-list">
-      <li>Không Niết</li>
-      <li>Không Linh</li>
-      <li>Không Huyền</li>
-      <li>Không Kiếp</li>
-    </ul>
-  </div>
+  <script>
+    const diceFaces = ['\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685'];
 
-  <div class="step">
-    <h2>Bước Tu Đạo Thứ Tư</h2>
-    <ul class="stage-list">
-      <li><strong>Đạp Thiên Cảnh</strong> — vượt khỏi thiên đạo, chạm tới sáng tạo</li>
-    </ul>
-  </div>
+    // Chuyển giữa 2 chế độ
+    function switchMode() {
+      document.getElementById('game-mode').classList.toggle('hidden');
+      document.getElementById('seed-mode').classList.toggle('hidden');
+    }
 
-  <footer>
-    Dựa theo phân chia cảnh giới từ bạn & tiểu thuyết "Tiên Nghịch" của Nhĩ Căn.
-  </footer>
+    // Hàm random có seed
+    function seededRandom(s) {
+      let x = Math.sin(s) * 10000;
+      return x - Math.floor(x);
+    }
+
+    // Chế độ random có seed cố định
+    let baseSeed = 58588585;
+    let currentSeed = baseSeed;
+
+    async function rollRandom() {
+      const dice = document.getElementById('dice1');
+      const result = document.getElementById('result1');
+
+      let d1, d2, d3;
+
+      for (let i = 0; i < 10; i++) {
+        d1 = Math.floor(seededRandom(currentSeed++) * 6);
+        d2 = Math.floor(seededRandom(currentSeed++) * 6);
+        d3 = Math.floor(seededRandom(currentSeed++) * 6);
+        dice.textContent = diceFaces[d1] + diceFaces[d2] + diceFaces[d3];
+        await new Promise(r => setTimeout(r, 60));
+      }
+
+      let sum = d1 + d2 + d3 + 3;
+      let resText = sum > 10 ? 'Tài' : 'Xỉu';
+      let color = sum > 10 ? 'red' : 'green';
+      result.textContent = resText;
+      result.style.color = color;
+    }
+
+    // Chế độ nhập seed thủ công
+    function rollWithSeed() {
+      const seedVal = parseInt(document.getElementById('seedInput').value);
+      const dice = document.getElementById('dice2');
+      const result = document.getElementById('result2');
+
+      if (isNaN(seedVal)) {
+        result.textContent = "Bạn phải nhập số seed!";
+        result.style.color = "orange";
+        return;
+      }
+
+      let s = seedVal;
+      let d1 = Math.floor(seededRandom(s++) * 6);
+      let d2 = Math.floor(seededRandom(s++) * 6);
+      let d3 = Math.floor(seededRandom(s++) * 6);
+
+      dice.textContent = diceFaces[d1] + diceFaces[d2] + diceFaces[d3];
+
+      let sum = d1 + d2 + d3 + 3;
+      let resText = sum > 10 ? 'Tài' : 'Xỉu';
+      let color = sum > 10 ? 'red' : 'green';
+      result.textContent = resText;
+      result.style.color = color;
+    }
+  </script>
+
 </body>
 </html>
